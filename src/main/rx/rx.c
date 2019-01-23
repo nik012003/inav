@@ -472,7 +472,7 @@ static uint16_t applyChannelFiltering(uint8_t chan, uint16_t sample)
 bool calculateRxChannelsAndUpdateFailsafe(timeUs_t currentTimeUs)
 {
     UNUSED(currentTimeUs);
-
+    
     int16_t rcStaging[MAX_SUPPORTED_RC_CHANNEL_COUNT];
     const timeMs_t currentTimeMs = millis();
 

@@ -131,7 +131,7 @@ typedef struct rxConfig_s {
     uint16_t rx_min_usec;
     uint16_t rx_max_usec;
     uint8_t rcSmoothing;                    // Enable/Disable RC filtering
-} rxConfig_t;
+} rxConfig_t; 
 
 PG_DECLARE(rxConfig_t, rxConfig);
 

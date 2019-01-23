@@ -29,27 +29,39 @@
 
 #include "rx/rx.h"
 #include "rx/combined.h"
+#include "rx/sbus.h"
+
+rxRuntimeConfig_t *combinedRxRuntimeConf;
+rxConfig_t *combinedRxConfig;
 
 static uint16_t mspFrame[MAX_SUPPORTED_RC_CHANNEL_COUNT] = {1000,1000,1000,1000,1000,1000};
 
-static uint16_t rxCombinedReadRawRC()
+
+static uint8_t combinedRxFrameStatus(rxRuntimeConfig_t *rxRuntimeConfig)
 {
-    return mspFrame;
+    return RX_FRAME_PENDING;
 }
 
-static uint8_t rxCombinedFrameStatus(rxRuntimeConfig_t *rxRuntimeConfig)
-{
-    return RX_FRAME_COMPLETE;
+static uint16_t combinedRxReadRawRC(const rxRuntimeConfig_t *rxRuntimeConfig, uint8_t chan) {
+    return sbusChannelsReadRawRC(&combinedRxRuntimeConf, chan);
+    //return mspFrame;
 }
 
 void combinedRxInit(const rxConfig_t *rxConfig, rxRuntimeConfig_t *rxRuntimeConfig)
 {
-    UNUSED(rxConfig);
-
+    combinedRxConfig = rxConfig;
+    combinedRxConfig->receiverType = RX_TYPE_SERIAL;
+    combinedRxConfig->serialrx_provider = SERIALRX_SBUS;
+    
     rxRuntimeConfig->channelCount = MAX_SUPPORTED_RC_CHANNEL_COUNT;
     rxRuntimeConfig->rxRefreshRate = 20000;
     rxRuntimeConfig->rxSignalTimeout = DELAY_5_HZ;
-    rxRuntimeConfig->rcReadRawFn = rxCombinedReadRawRC;
-    rxRuntimeConfig->rcFrameStatusFn = rxCombinedFrameStatus;
+    rxRuntimeConfig->rcReadRawFn = combinedRxReadRawRC;
+    rxRuntimeConfig->rcFrameStatusFn = combinedRxFrameStatus;
+    
+    combinedRxRuntimeConf = rxRuntimeConfig;
+        
+    sbusInit(combinedRxRuntimeConf, combinedRxConfig);
+
 }
 #endif
