@@ -63,6 +63,7 @@
 #include "rx/crsf.h"
 #include "rx/eleres.h"
 #include "rx/uib_rx.h"
+#include "rx/combined.h"
 
 
 //#define DEBUG_RX_SIGNAL_LOSS
@@ -303,7 +304,11 @@ void rxInit(void)
             }
             break;
 #endif
-
+#ifdef USE_RX_MSP
+        case RX_TYPE_COMBINED:
+            combinedRxInit(rxConfig(), &rxRuntimeConfig);
+            break;
+#endif
         case RX_TYPE_NONE:
         default:
             // Already configured for NONE
