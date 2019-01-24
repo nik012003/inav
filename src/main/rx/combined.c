@@ -42,8 +42,17 @@ static uint8_t combinedRxFrameStatus(rxRuntimeConfig_t *rxRuntimeConfig)
     return RX_FRAME_PENDING;
 }
 
-static uint16_t combinedRxReadRawRC(const rxRuntimeConfig_t *rxRuntimeConfig, uint8_t chan) {
-    return sbusChannelsReadRawRC(&combinedRxRuntimeConf, chan);
+static uint16_t errorFunc(const rxRuntimeConfig_t *rxRuntimeConfig, uint8_t chan) 
+{
+    return mspFrame;
+}
+
+static uint16_t combinedRxReadRawRC(const rxRuntimeConfig_t *rxRuntimeConfig, uint8_t chan) 
+{
+    //u_int16_t sample;
+    //return (5 * combinedRxRuntimeConf->channelData[chan] / 8) + 880;
+    return (*combinedRxRuntimeConf->rcReadRawFn)(&combinedRxRuntimeConf, chan); //If I do it here, it does not
+    //UNUSED(sample);
     //return mspFrame;
 }
 
@@ -60,8 +69,13 @@ void combinedRxInit(const rxConfig_t *rxConfig, rxRuntimeConfig_t *rxRuntimeConf
     rxRuntimeConfig->rcFrameStatusFn = combinedRxFrameStatus;
     
     combinedRxRuntimeConf = rxRuntimeConfig;
-        
-    sbusInit(combinedRxRuntimeConf, combinedRxConfig);
+    combinedRxRuntimeConf->rcReadRawFn = errorFunc;
+
+    //combinedRxRuntimeConf->rxSignalTimeout = DELAY_10_HZ;
+    //combinedRxRuntimeConf->requireFiltering = false;
+    
+    
+    sbusInit(combinedRxConfig , combinedRxRuntimeConf);
 
 }
 #endif

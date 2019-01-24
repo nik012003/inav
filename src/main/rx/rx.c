@@ -503,7 +503,7 @@ bool calculateRxChannelsAndUpdateFailsafe(timeUs_t currentTimeUs)
         const uint8_t rawChannel = calculateChannelRemapping(rxConfig()->rcmap, REMAPPABLE_CHANNEL_COUNT, channel);
 
         // sample the channel
-        uint16_t sample = (*rxRuntimeConfig.rcReadRawFn)(&rxRuntimeConfig, rawChannel);
+        uint16_t sample = (*rxRuntimeConfig.rcReadRawFn)(&rxRuntimeConfig, rawChannel); //so here it successfully calls sbusChannelsReadRawRC
 
         // apply the rx calibration to flight channel
         if (channel < NON_AUX_CHANNEL_COUNT && sample != PPM_RCVR_TIMEOUT) {
