@@ -361,6 +361,9 @@ groups:
       - name: serialrx_halfduplex
         field: halfDuplex
         type: bool
+      - name: msp_override
+        field: mspOverride
+        type: bool
 
   - name: PG_BLACKBOX_CONFIG
     type: blackboxConfig_t

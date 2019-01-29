@@ -127,7 +127,9 @@ typedef struct rxConfig_s {
     uint16_t maxcheck;                      // maximum rc end
     uint16_t rx_min_usec;
     uint16_t rx_max_usec;
-    uint8_t rcSmoothing;                    // Enable/Disable RC filtering
+    uint8_t rcSmoothing;  
+    bool mspOverride;
+    bool mspOverrideChannels[MAX_SUPPORTED_RC_CHANNEL_COUNT] ;                  // Enable/Disable RC filtering
 } rxConfig_t;
 
 PG_DECLARE(rxConfig_t, rxConfig);
