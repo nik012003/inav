@@ -513,7 +513,9 @@ void calculateRxChannelsAndUpdateFailsafe(timeUs_t currentTimeUs)
         uint16_t sample = (*rxRuntimeConfig.rcReadRawFn)(&rxRuntimeConfig, rawChannel);
 
         if(IS_RC_MODE_ACTIVE(BOXMSPOVERRIDE)){
-            uint16_t overridesample = (*overrideRxRuntimeConfig.rcReadRawFn)(&overrideRxRuntimeConfig, rawChannel);
+            if (rxConfig()->mspOverrideChannels[channel]){ //Check if channels must be overwritten
+                 sample = (*overrideRxRuntimeConfig.rcReadRawFn)(&overrideRxRuntimeConfig, rawChannel); //Overwrite it
+            }
         }
         // TODO: Check if the channel must be overridden (rxConfig->mspOverrideChannels[rawChannel] is true)  and overwrite it in sample
         // apply the rx calibration to flight channel
