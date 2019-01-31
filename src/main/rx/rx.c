@@ -98,6 +98,7 @@ timeMs_t rcInvalidPulsPeriod[MAX_SUPPORTED_RC_CHANNEL_COUNT];
 #define SKIP_RC_SAMPLES_ON_RESUME  2                // flush 2 samples to drop wrong measurements (timing independent)
 
 rxRuntimeConfig_t rxRuntimeConfig;
+rxRuntimeConfig_t overrideRxRuntimeConfig;
 static uint8_t rcSampleIndex = 0;
 
 PG_REGISTER_WITH_RESET_TEMPLATE(rxConfig_t, rxConfig, PG_RX_CONFIG, 7);
@@ -131,7 +132,10 @@ PG_RESET_TEMPLATE(rxConfig_t, rxConfig,
     .rssiMax = RSSI_VISIBLE_VALUE_MAX,
     .sbusSyncInterval = SBUS_DEFAULT_INTERFRAME_DELAY_US,
     .rcFilterFrequency = 50,
+    .mspOverride = true, 
+    .mspOverrideChannels = {true,true,true,true,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false},
 );
+rxConfig_t overrideRxConfig;
 
 void resetAllRxChannelRangeConfigurations(void)
 {
@@ -262,6 +266,11 @@ void rxInit(void)
             // Initialize ARM AUX channel to OFF value
             rcData[modeActivationConditions(i)->auxChannelIndex + NON_AUX_CHANNEL_COUNT] = value;
         }
+    }
+
+    if (rxConfig()->mspOverride){
+        memcpy(&overrideRxConfig, rxConfig, sizeof(overrideRxConfig));
+        rxMspInit(&overrideRxConfig, &overrideRxRuntimeConfig); //Initalizie MSP rx protocol if MSP OVERRIDE is active( set it thru the CLI with )
     }
 
     switch (rxConfig()->receiverType) {
@@ -499,7 +508,13 @@ bool calculateRxChannelsAndUpdateFailsafe(timeUs_t currentTimeUs)
 
         // sample the channel
         uint16_t sample = (*rxRuntimeConfig.rcReadRawFn)(&rxRuntimeConfig, rawChannel);
-
+        
+        if(IS_RC_MODE_ACTIVE(BOXMSPOVERRIDE)){
+            if (rxConfig()->mspOverrideChannels[channel]){ //Check if channels must be overwritten
+                 sample = (*overrideRxRuntimeConfig.rcReadRawFn)(&overrideRxRuntimeConfig, rawChannel); //Overwrite it
+            }
+        }
+        
         // apply the rx calibration to flight channel
         if (channel < NON_AUX_CHANNEL_COUNT && sample != PPM_RCVR_TIMEOUT) {
             sample = scaleRange(sample, rxChannelRangeConfigs(channel)->min, rxChannelRangeConfigs(channel)->max, PWM_RANGE_MIN, PWM_RANGE_MAX);
@@ -554,6 +569,16 @@ void parseRcChannels(const char *input)
         const char *s = strchr(rcChannelLetters, *c);
         if (s && (s < rcChannelLetters + MAX_MAPPABLE_RX_INPUTS))
             rxConfigMutable()->rcmap[s - rcChannelLetters] = c - input;
+    }
+}
+
+void parseOverrideChannels(const char *input){
+    for(uint8_t i = 0; i <= strlen(input); i++){
+        if (input[i] == '0') {
+        rxConfigMutable()->mspOverrideChannels[i] = false;
+        } else if(input[i] == '1') {
+        rxConfigMutable()->mspOverrideChannels[i] = true;
+        }
     }
 }
 

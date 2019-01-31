@@ -130,6 +130,8 @@ typedef struct rxConfig_s {
     uint16_t rx_min_usec;
     uint16_t rx_max_usec;
     uint8_t rcFilterFrequency;              // RC filter cutoff frequency (smoothness vs response sharpness)
+    bool mspOverride;
+    bool mspOverrideChannels[MAX_SUPPORTED_RC_CHANNEL_COUNT] ;
 } rxConfig_t;
 
 PG_DECLARE(rxConfig_t, rxConfig);
@@ -171,6 +173,8 @@ bool rxAreFlightChannelsValid(void);
 bool calculateRxChannelsAndUpdateFailsafe(timeUs_t currentTimeUs);
 
 void parseRcChannels(const char *input);
+
+void parseOverrideChannels(const char *input);
 
 // filtered = true indicates that newRssi comes from a source which already does
 // filtering and no further filtering should be performed in the value.

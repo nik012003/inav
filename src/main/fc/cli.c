@@ -1944,6 +1944,49 @@ static void cliMap(char *cmdline)
     cliPrintLinef("%s", out);
 }
 
+static void printOverrideChannels()
+{
+    uint8_t i;
+    char out[MAX_SUPPORTED_RC_CHANNEL_COUNT];
+    char *boolstring( _Bool b ) { return b ? '1' : '0'; }
+    for (i = 0; i <= MAX_SUPPORTED_RC_CHANNEL_COUNT; i++) 
+        out[i] = boolstring(rxConfig()->mspOverrideChannels[i]);
+    out[i] = '\0';
+    cliPrintLinef("%s", out);
+}
+
+static void cliOverrideChannels(char *cmdline)
+{
+    uint32_t len;
+    char out[MAX_SUPPORTED_RC_CHANNEL_COUNT];
+
+    len = strlen(cmdline);
+
+    if(len <= MAX_SUPPORTED_RC_CHANNEL_COUNT){
+        for(uint8_t i = 0; i < len; i++) {
+            if(cmdline[i] == '0' || cmdline[i] == '1') {
+                continue;
+            } else {
+                cliShowParseError();
+                return;
+            }
+        }
+    } else if (len != 0) {
+        cliShowParseError();
+        return;
+    }
+
+    parseOverrideChannels(cmdline);
+
+    cliPrint("override_channels ");
+    uint8_t i;
+    char *boolstring( _Bool b ) { return b ? '1' : '0'; }
+    for (i = 0; i < MAX_SUPPORTED_RC_CHANNEL_COUNT; i++) 
+        out[i] = boolstring(rxConfig()->mspOverrideChannels[i]);
+    out[i] = '\0';
+    cliPrintLinef("%s", out);
+}
+
 static const char *checkCommand(const char *cmdLine, const char *command)
 {
     if (!sl_strncasecmp(cmdLine, command, strlen(command))   // command names match
@@ -2615,6 +2658,9 @@ static void printConfig(const char *cmdline, bool doDiff)
         cliPrintHashLine("map");
         printMap(dumpMask, &rxConfig_Copy, rxConfig());
 
+        cliPrintHashLine("override_channels");
+        printOverrideChannels();
+        
         cliPrintHashLine("serial");
         printSerial(dumpMask, &serialConfig_Copy, serialConfig());
 
@@ -2767,6 +2813,7 @@ const clicmd_t cmdTable[] = {
     CLI_COMMAND_DEF("led", "configure leds", NULL, cliLed),
 #endif
     CLI_COMMAND_DEF("map", "configure rc channel order", "[<map>]", cliMap),
+    CLI_COMMAND_DEF("override_channels", "configure rc channels to override when MSP OVERRIDE is active", "[<override_channels>]", cliOverrideChannels),
     CLI_COMMAND_DEF("memory", "view memory usage", NULL, cliMemory),
     CLI_COMMAND_DEF("mmix", "custom motor mixer", NULL, cliMotorMix),
     CLI_COMMAND_DEF("motor",  "get/set motor", "<index> [<value>]", cliMotor),

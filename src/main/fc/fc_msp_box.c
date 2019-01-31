@@ -85,6 +85,7 @@ static const box_t boxes[CHECKBOX_ITEM_COUNT + 1] = {
     { BOXUSER1, "USER1", 47 },
     { BOXUSER2, "USER2", 48 },
     { BOXLOITERDIRCHN, "LOITER CHANGE", 49 },
+    { BOXMSPOVERRIDE, "MSP OVERRIDE", 50 },
     { CHECKBOX_ITEM_COUNT, NULL, 0xFF }
 };
 
