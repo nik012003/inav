@@ -134,7 +134,7 @@ PG_RESET_TEMPLATE(rxConfig_t, rxConfig,
     .rssiInvert = 0,
     .rcSmoothing = 1,
     .mspOverride = true, 
-    .mspOverrideChannels = {true,true,true,true,true,true,true,true,false,false,false,false,false,false,false,false,false,false,false,false}, //Let's change them manually for now
+    .mspOverrideChannels = {true,true,true,true,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false}, //Let's change them manually for now
 );
 rxConfig_t overrideRxConfig;
 
@@ -561,6 +561,16 @@ void parseRcChannels(const char *input)
         const char *s = strchr(rcChannelLetters, *c);
         if (s && (s < rcChannelLetters + MAX_MAPPABLE_RX_INPUTS))
             rxConfigMutable()->rcmap[s - rcChannelLetters] = c - input;
+    }
+}
+
+void parseOverrideChannels(const char *input){
+    for(uint8_t i = 0; i <= strlen(input); i++){
+        if (input[i] == '0') {
+        rxConfigMutable()->mspOverrideChannels[i] = false;
+        } else if(input[i] == '1') {
+        rxConfigMutable()->mspOverrideChannels[i] = true;
+        }
     }
 }
 

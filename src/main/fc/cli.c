@@ -1875,6 +1875,49 @@ static void cliBeeper(char *cmdline)
 }
 #endif
 
+static void printOverrideChannels()
+{
+    uint8_t i;
+    char out[MAX_SUPPORTED_RC_CHANNEL_COUNT];
+    char *boolstring( _Bool b ) { return b ? '1' : '0'; }
+    for (i = 0; i <= MAX_SUPPORTED_RC_CHANNEL_COUNT; i++) 
+        out[i] = boolstring(rxConfig()->mspOverrideChannels[i]);
+    out[i] = '\0';
+    cliPrintLinef("%s", out);
+}
+
+static void cliOverrideChannels(char *cmdline)
+{
+    uint32_t len;
+    char out[MAX_SUPPORTED_RC_CHANNEL_COUNT];
+
+    len = strlen(cmdline);
+
+    if(len <= MAX_SUPPORTED_RC_CHANNEL_COUNT){
+        for(uint8_t i = 0; i < len; i++) {
+            if(cmdline[i] == '0' || cmdline[i] == '1') {
+                continue;
+            } else {
+                cliShowParseError();
+                return;
+            }
+        }
+    } else if (len != 0) {
+        cliShowParseError();
+        return;
+    }
+
+    parseOverrideChannels(cmdline);
+
+    cliPrint("override_channels ");
+    uint8_t i;
+    char *boolstring( _Bool b ) { return b ? '1' : '0'; }
+    for (i = 0; i < MAX_SUPPORTED_RC_CHANNEL_COUNT; i++) 
+        out[i] = boolstring(rxConfig()->mspOverrideChannels[i]);
+    out[i] = '\0';
+    cliPrintLinef("%s", out);
+}
+
 static void printMap(uint8_t dumpMask, const rxConfig_t *rxConfig, const rxConfig_t *defaultRxConfig)
 {
     bool equalsDefault = true;
@@ -2617,6 +2660,9 @@ static void printConfig(const char *cmdline, bool doDiff)
         cliPrintHashLine("map");
         printMap(dumpMask, &rxConfig_Copy, rxConfig());
 
+        cliPrintHashLine("override_channels");
+        printOverrideChannels();
+
         cliPrintHashLine("name");
         printName(dumpMask, &systemConfig_Copy);
 
@@ -2755,6 +2801,7 @@ const clicmd_t cmdTable[] = {
     CLI_COMMAND_DEF("led", "configure leds", NULL, cliLed),
 #endif
     CLI_COMMAND_DEF("map", "configure rc channel order", "[<map>]", cliMap),
+    CLI_COMMAND_DEF("override_channels", "configure rc channels to override when MSP OVERRIDE is active", "[<override_channels>]", cliOverrideChannels),
 #ifndef USE_QUAD_MIXER_ONLY
     CLI_COMMAND_DEF("mixer", "configure mixer",
         "list\r\n"

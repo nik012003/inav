@@ -172,6 +172,8 @@ void calculateRxChannelsAndUpdateFailsafe(timeUs_t currentTimeUs);
 
 void parseRcChannels(const char *input);
 
+void parseOverrideChannels(const char *input);
+
 // filtered = true indicates that newRssi comes from a source which already does
 // filtering and no further filtering should be performed in the value.
 void setRSSI(uint16_t newRssi, rssiSource_e source, bool filtered);
